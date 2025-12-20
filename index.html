@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Museum X - 交互版原型</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f5f6f7;
+            color: #333;
+        }
+
+        a {
+            color: #1677ff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #ffffff;
+            padding: 10px 40px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .logo span {
+            color: #ff6a00;
+        }
+
+        .top-search {
+            flex: 1;
+            margin: 0 40px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .top-search select,
+        .top-search input {
+            padding: 8px 10px;
+            border-radius: 4px;
+            border: 1px solid #d9d9d9;
+            font-size: 14px;
+        }
+
+        .top-search input {
+            flex: 1;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 4px;
+            border: 1px solid #1677ff;
+            background: #1677ff;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #1677ff;
+        }
+
+        /* 路由容器与页面 */
+
+        main#app {
+            max-width: 1120px;
+            margin: 20px auto 40px;
+            padding: 0 20px;
+        }
+
+        .page {
+            display: none;
+            margin-bottom: 40px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(4px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        /* 首页左右布局 */
+
+        .home-layout {
+            display: flex;
+            gap: 20px;
+        }
+
+        .main-left {
+            flex: 3;
+        }
+
+        .main-right {
+            flex: 1.3;
+        }
+
+        section {
+            background: #fff;
+            margin-bottom: 16px;
+            padding: 16px 18px 20px;
+            border-radius: 6px;
+            border: 1px solid #f0f0f0;
+        }
+
+        section h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+
+        section h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+        }
+
+        .sub-title {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        /* 卡片列表 */
+
+        .card-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            border: 1px solid #f0f0f0;
+            border-radius: 4px;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .tag-row {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 1px 6px;
+            margin-right: 4px;
+            margin-bottom: 2px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+        }
+
+        .rating {
+            font-size: 12px;
+            color: #ff9c00;
+            margin-right: 6px;
+        }
+
+        .meta {
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* 动态列表 */
+
+        .feed-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f3f3;
+            font-size: 13px;
+        }
+
+        .feed-item:last-child {
+            border-bottom: none;
+        }
+
+        .feed-header {
+            color: #555;
+            margin-bottom: 4px;
+        }
+
+        .feed-content {
+            margin-bottom: 4px;
+        }
+
+        .feed-meta {
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* 侧边栏 */
+
+        .side-block {
+            margin-bottom: 16px;
+        }
+
+        .side-block h3 {
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            margin: 2px 4px 2px 0;
+            border-radius: 10px;
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            font-size: 11px;
+            color: #389e0d;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .profile-stat {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .simple-list {
+            font-size: 13px;
+            padding-left: 16px;
+            margin: 0;
+        }
+
+        .simple-list li {
+            margin-bottom: 4px;
+        }
+
+        footer {
+            max-width: 1120px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        footer a {
+            color: #888;
+        }
+
+        /* 详情页结构 */
+
+        .detail-page {
+            margin-top: 10px;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .detail-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .detail-sub {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            border: 1px solid #e0e0e0;
+            background: #fafafa;
+            margin-left: 4px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 2.3fr 3fr;
+            gap: 20px;
+        }
+
+        .detail-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 10px 0 6px;
+        }
+
+        .comment-item {
+            border-bottom: 1px solid #f3f3f3;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .comment-meta {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 3px;
+        }
+
+        .comment-text {
+            margin-bottom: 3px;
+        }
+
+        .comment-actions {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb a {
+            color: #999;
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        /* 顶部导航 */
+
+        .top-nav {
+            margin-left: 30px;
+            font-size: 13px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .top-nav a {
+            color: #555;
+        }
+
+        .top-nav a.active {
+            color: #1677ff;
+            font-weight: 600;
+        }
+
+        @media (max-width: 900px) {
+            .home-layout {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        Museum<span>X</span>
+    </div>
+
+    <div class="top-search">
+        <select aria-label="选择城市">
+            <option>上海</option>
+            <option>北京</option>
+            <option>广州</option>
+            <option>深圳</option>
+            <option>成都</option>
+        </select>
+
+        <input type="search" placeholder="搜索博物馆 / 展览 / 用户">
+    </div>
+
+    <nav class="top-nav">
+        <a href="#home" data-nav="home">首页</a>
+        <a href="#exhibition-detail-eg1" data-nav="exhibition">展览</a>
+        <a href="#city-beijing" data-nav="city">城市</a>
+        <a href="#user-profile-1" data-nav="community">社区</a>
+    </nav>
+
+    <div>
+        <button class="btn-outline btn">登录 / 注册</button>
+    </div>
+</header>
+
+<main id="app">
+
+    <!-- 首页 -->
+    <section class="page" id="home">
+        <div class="home-layout">
+            <!-- 左侧：首页内容 -->
+            <div class="main-left">
+                <!-- 热门博物馆 -->
+                <section id="hot-museums">
+                    <h2>本城热门博物馆</h2>
+                    <div class="sub-title">根据近期打卡量、评分、讨论热度综合排序</div>
+
+                    <div class="card-list">
+                        <article class="card">
+                            <div class="card-title">
+                                <a href="#museum-detail-shanghai-museum">上海博物馆（人民广场馆）</a>
+                            </div>
+                            <div class="card-subtitle">
+                                历史 / 文物 · 黄浦区&nbsp;人民大道 201 号
+                            </div>
+                            <div>
+                                <span class="rating">评分 4.7 / 5</span>
+                                <span class="meta">3.2 万人来过 · 2.1 万条点评</span>
+                            </div>
+                            <div class="tag-row">
+                                <span class="tag">常设展丰富</span>
+                                <span class="tag">适合第一次来上海</span>
+                                <span class="tag">中文讲解不错</span>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-title">
+                                <a href="#museum-detail-shanghai-plan">上海城市规划展示馆</a>
+                            </div>
+                            <div class="card-subtitle">
+                                城市 / 建筑 · 黄浦区&nbsp;人民大道 100 号
+                            </div>
+                            <div>
+                                <span class="rating">评分 4.4 / 5</span>
+                                <span class="meta">1.1 万人来过 · 5,321 条点评</span>
+                            </div>
+                            <div class="tag-row">
+                                <span class="tag">城市沙盘</span>
+                                <span class="tag">适合建筑爱好者</span>
+                                <span class="tag">亲子友好</span>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-title">
+                                <a href="#museum-detail-shanghai-art">上海当代艺术博物馆（PSA）</a>
+                            </div>
+                            <div class="card-subtitle">
+                                艺术 / 设计 · 黄浦区&nbsp;花园港路 200 号
+                            </div>
+                            <div>
+                                <span class="rating">评分 4.3 / 5</span>
+                                <span class="meta">2.0 万人来过 · 1.5 万条点评</span>
+                            </div>
+                            <div class="tag-row">
+                                <span class="tag">当代艺术</span>
+                                <span class="tag">江景好</span>
+                                <span class="tag">临时展多</span>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-title">
+                                <a href="#museum-detail-shanghai-planet">上海天文馆</a>
+                            </div>
+                            <div class="card-subtitle">
+                                科技 / 自然 · 浦东新区&nbsp;临港大道 380 号
+                            </div>
+                            <div>
+                                <span class="rating">评分 4.6 / 5</span>
+                                <span class="meta">8,932 人来过 · 6,120 条点评</span>
+                            </div>
+                            <div class="tag-row">
+                                <span class="tag">适合亲子</span>
+                                <span class="tag">预约热门</span>
+                                <span class="tag">科普性强</span>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- 热门展览 -->
+                <section id="hot-exhibitions">
+                    <h2>正在热展</h2>
+                    <div class="sub-title">按展览热度排序 · 近期 30 天内在上海的展览</div>
+
+                    <div class="card-list">
+                        <article class="card">
+                            <div class="card-title">
+                                <a href="#exhibition-detail-eg1">「青铜之光」——中国古代青铜文明特展</a>
+                            </div>
+                            <div class="card-subtitle">
+                                上海博物馆 · 2025-03-01 ~ 2025-06-30
+                            </div>
+                            <div>
+                                <span class="rating">展览评分 4.8 / 5</span>
+                                <span class="meta">8,120 人看过 · 1,345 条评论</span>
+                            </div>
+                            <div class="tag-row">
+                                <span class="tag">国宝级文物</span>
+                                <span class="tag">策展清晰</span>
+                                <span class="tag">推荐至少 2 小时</span>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-title">
+                                <a href="#exhibition-detail-eg2">数字之城：未来城市交互体验展</a>
+                            </div>
+                            <div class="card-subtitle">
+                                上海城市规划展示馆 · 2025-02-10 ~ 2025-05-10
+                            </div>
+                            <div>
+                                <span class="rating">展览评分 4.4 / 5</span>
+                                <span class="meta">3,421 人看过 · 842 条评论</span>
+                            </div>
+                            <div class="tag-row">
+                                <span class="tag">沉浸式</span>
+                                <span class="tag">互动装置</span>
+                                <span class="tag">适合拍照</span>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-title">
+                                <a href="#exhibition-detail-eg3">光与影：20 世纪摄影大师联展</a>
+                            </div>
+                            <div class="card-subtitle">
+                                上海当代艺术博物馆 · 2025-01-20 ~ 2025-04-15
+                            </div>
+                            <div>
+                                <span class="rating">展览评分 4.6 / 5</span>
+                                <span class="meta">5,532 人看过 · 1,233 条评论</span>
+                            </div>
+                            <div class="tag-row">
+                                <span class="tag">影像艺术</span>
+                                <span class="tag">多媒体</span>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-title">
+                                <a href="#exhibition-detail-eg4">星际漫游：人类与宇宙的对话</a>
+                            </div>
+                            <div class="card-subtitle">
+                                上海天文馆 · 2025-03-15 ~ 2025-08-31
+                            </div>
+                            <div>
+                                <span class="rating">展览评分 4.7 / 5</span>
+                                <span class="meta">2,153 人看过 · 502 条评论</span>
+                            </div>
+                            <div class="tag-row">
+                                <span class="tag">天文科普</span>
+                                <span class="tag">亲子</span>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- 精选攻略 / 游记入口 -->
+                <section>
+                    <h2>精选攻略 · 游记</h2>
+                    <div class="sub-title">由活跃作者撰写的观展建议</div>
+                    <ul class="simple-list">
+                        <li>
+                            <a href="#article-long-psa">在光与影之间看见 20 世纪 —— 摄影大师联展观展记</a>
+                            · by 北方来客
+                        </li>
+                        <li>
+                            <a href="#user-profile-3">带娃暴走团</a> ·
+                            <a href="#museum-detail-shanghai-planet">上海天文馆亲子一日路线</a>（示例）
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- 最新打卡动态 -->
+                <section id="feed">
+                    <h2>最新打卡 · 游记</h2>
+                    <div class="sub-title">关注的人 + 本城最新内容</div>
+
+                    <article class="feed-item">
+                        <div class="feed-header">
+                            <a href="#user-profile-1">木木是只猫</a> 在
+                            <a href="#museum-detail-shanghai-museum">上海博物馆</a>
+                            打卡 · 标记「看过」
+                            <a href="#exhibition-detail-eg1">青铜之光</a>
+                        </div>
+                        <div class="feed-content">
+                            「展品密度非常高，讲解做得比想象中细，建议一定要租语音讲解或者跟团走。」
+                        </div>
+                        <div class="feed-meta">
+                            2025-03-21 · 用时约 3 小时 · 安利指数：很推荐
+                        </div>
+                    </article>
+
+                    <article class="feed-item">
+                        <div class="feed-header">
+                            <a href="#user-profile-2">北方来客</a> 写了长评：
+                            <a href="#exhibition-detail-eg3">光与影：20 世纪摄影大师联展</a>
+                        </div>
+                        <div class="feed-content">
+                            「很少有这么系统的摄影展，按时间线和主题分区，既能看到技术演变，也能感受到时代情绪变化……」
+                            <a href="#article-long-psa">阅读全文 &gt;</a>
+                        </div>
+                        <div class="feed-meta">
+                            2025-03-20 · 赞 54 · 评论 12 · 收藏 31
+                        </div>
+                    </article>
+
+                    <article class="feed-item">
+                        <div class="feed-header">
+                            <a href="#user-profile-3">带娃暴走团</a> 在
+                            <a href="#museum-detail-shanghai-planet">上海天文馆</a>
+                            打卡
+                        </div>
+                        <div class="feed-content">
+                            「对 6 岁小朋友非常友好，互动装置多，但周末人非常多，最好避开高峰。」
+                        </div>
+                        <div class="feed-meta">
+                            2025-03-19 · 亲子 · 排队约 40 分钟
+                        </div>
+                    </article>
+                </section>
+            </div>
+
+            <!-- 右侧：侧边栏 -->
+            <aside class="main-right">
+                <section class="side-block">
+                    <h3>本周榜单 · 口碑最佳展览</h3>
+                    <ol class="simple-list">
+                        <li>
+                            <a href="#exhibition-detail-eg1">青铜之光</a>
+                            （评分 4.8）
+                        </li>
+                        <li>
+                            <a href="#exhibition-detail-eg3">光与影：摄影大师联展</a>
+                            （评分 4.6）
+                        </li>
+                        <li>
+                            <a href="#exhibition-detail-eg2">数字之城</a>
+                            （评分 4.4）
+                        </li>
+                    </ol>
+                </section>
+
+                <section class="side-block" id="side-user">
+                    <h3>我的打卡概览</h3>
+                    <div class="profile-header">
+                        <div class="avatar" aria-hidden="true"></div>
+                        <div>
+                            <div class="profile-name">龚子傲</div>
+                            <div class="profile-stat">欢迎回来，博物馆游历达人</div>
+                        </div>
+                    </div>
+                    <button class="btn" style="width: 100%;">注销</button>
+                </section>
+
+                <section class="side-block">
+                    <h3>热门标签</h3>
+                    <div>
+                        <span class="badge">亲子友好</span>
+                        <span class="badge">建筑控</span>
+                        <span class="badge">当代艺术</span>
+                        <span class="badge">自然科普</span>
+                        <span class="badge">免费馆</span>
+                        <span class="badge">冷门好馆</span>
+                        <span class="badge">适合拍照</span>
+                    </div>
+                </section>
+
+                <section class="side-block">
+                    <h3>发现更多城市</h3>
+                    <ul class="simple-list">
+                        <li><a href="#city-beijing">北京 · 112 个博物馆</a></li>
+                        <li><a href="#city-guangzhou">广州 · 68 个博物馆</a></li>
+                        <li><a href="#city-chengdu">成都 · 51 个博物馆</a></li>
+                        <li><a href="#city-more">更多城市 &gt;</a></li>
+                    </ul>
+                </section>
+            </aside>
+        </div>
+    </section>
+
+    <!-- ================== 详情页开始：博物馆 ================== -->
+
+    <section class="page detail-page" id="museum-detail-shanghai-museum">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 上海博物馆（人民广场馆）
+        </div>
+
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">上海博物馆（人民广场馆）</div>
+                <div class="detail-sub">
+                    历史 / 文物 · 黄浦区 人民大道 201 号
+                    <span class="pill">地铁 1/2/8 号线 人民广场站</span>
+                </div>
+                <div style="margin-top: 6px; font-size: 13px;">
+                    <span class="rating">综合评分 4.7 / 5</span>
+                    <span class="meta">3.2 万人来过 · 2.1 万条评分 / 点评</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn">我来过 · 打卡</button>
+                <button class="btn-outline" style="margin-left: 8px;">想去</button>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">基本信息</div>
+                <ul class="simple-list">
+                    <li>开放时间：每天 9:00 - 17:00（16:00 停止入场），周一闭馆（节假日除外）</li>
+                    <li>票务：免费预约入馆，需实名预约</li>
+                    <li>预约方式：微信公众号「上海博物馆」或官网</li>
+                    <li>联系电话：021-12345678</li>
+                    <li>官网：https://www.shanghaimuseum.net/</li>
+                </ul>
+
+                <div class="detail-section-title">标签</div>
+                <div class="tag-row">
+                    <span class="tag">常设展丰富</span>
+                    <span class="tag">中国古代艺术</span>
+                    <span class="tag">讲解服务</span>
+                    <span class="tag">适合第一次来上海</span>
+                </div>
+
+                <div class="detail-section-title">当前展览</div>
+                <ul class="simple-list">
+                    <li>
+                        <a href="#exhibition-detail-eg1">「青铜之光」——中国古代青铜文明特展</a>
+                        （2025-03-01 ~ 2025-06-30）
+                    </li>
+                    <li>
+                        <a href="#exhibition-detail-permanent">馆藏经典常设展（书画 / 陶瓷 / 雕塑等）</a>
+                        （长期）
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="detail-section-title">精选点评</div>
+
+                <article class="comment-item">
+                    <div class="comment-meta">
+                        <a href="#user-profile-1">木木是只猫</a> · 评分 5.0 · 打卡第 2 次 · 2025-03-21
+                    </div>
+                    <div class="comment-text">
+                        非常适合第一次来上海的朋友，馆藏质量没话说，青铜和陶瓷两大展厅必看。
+                        如果时间不多，建议至少留出 3 小时。
+                    </div>
+                    <div class="comment-actions">
+                        有用 32 · 没用 1 · 评论 4
+                    </div>
+                </article>
+
+                <article class="comment-item">
+                    <div class="comment-meta">
+                        <a href="#user-profile-4">静静走路</a> · 评分 4.5 · 2025-03-18
+                    </div>
+                    <div class="comment-text">
+                        周末人太多，排队安检就排了半小时，建议工作日来体验更好。展品本身非常值得。
+                    </div>
+                    <div class="comment-actions">
+                        有用 18 · 没用 0 · 评论 2
+                    </div>
+                </article>
+
+                <div style="margin-top: 8px; font-size: 12px;">
+                    <a href="#museum-detail-shanghai-museum">查看全部 2.1 万 条评论 &gt;</a>
+                </div>
+
+                <div class="detail-section-title">最近打卡</div>
+                <ul class="simple-list">
+                    <li><a href="#user-profile-5">岛屿心情</a> · 今天 10:21 · 首次打卡</li>
+                    <li><a href="#user-profile-2">北方来客</a> · 昨天 15:03 · 第 3 次打卡</li>
+                    <li><a href="#user-profile-6">南城读书人</a> · 昨天 11:47 · 首次打卡</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="museum-detail-shanghai-plan">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 上海城市规划展示馆
+        </div>
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">上海城市规划展示馆</div>
+                <div class="detail-sub">
+                    城市 / 建筑 · 黄浦区 人民大道 100 号
+                    <span class="pill">城市规划 · 建筑</span>
+                </div>
+                <div style="margin-top: 6px; font-size: 13px;">
+                    <span class="rating">综合评分 4.4 / 5</span>
+                    <span class="meta">1.1 万人来过 · 5,321 条评分 / 点评</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn">我来过 · 打卡</button>
+                <button class="btn-outline" style="margin-left: 8px;">想去</button>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">亮点速览</div>
+                <ul class="simple-list">
+                    <li>超大比例城市沙盘，可以从高处俯瞰整个上海城市格局</li>
+                    <li>通过多媒体展示上海历史变迁与未来规划蓝图</li>
+                    <li>适合建筑、城市研究相关专业学生及爱好者</li>
+                </ul>
+
+                <div class="detail-section-title">当前展览</div>
+                <ul class="simple-list">
+                    <li><a href="#exhibition-detail-eg2">数字之城：未来城市交互体验展</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="detail-section-title">精选点评节选</div>
+                <article class="comment-item">
+                    <div class="comment-meta">
+                        <a href="#user-profile-2">北方来客</a> · 评分 4.5 · 2025-03-10
+                    </div>
+                    <div class="comment-text">
+                        对不了解上海的人来说，是一堂很系统的「上海城市发展概论」。
+                    </div>
+                    <div class="comment-actions">有用 21 · 没用 1</div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="museum-detail-shanghai-art">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 上海当代艺术博物馆（PSA）
+        </div>
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">上海当代艺术博物馆（PSA）</div>
+                <div class="detail-sub">
+                    艺术 / 设计 · 黄浦区 花园港路 200 号
+                    <span class="pill">黄浦江畔 · 工业改造建筑</span>
+                </div>
+                <div style="margin-top: 6px; font-size: 13px;">
+                    <span class="rating">综合评分 4.3 / 5</span>
+                    <span class="meta">2.0 万人来过 · 1.5 万条评分 / 点评</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn">我来过 · 打卡</button>
+                <button class="btn-outline" style="margin-left: 8px;">想去</button>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">馆况简介</div>
+                <ul class="simple-list">
+                    <li>改造自南市发电厂，是上海地标性的当代艺术场馆</li>
+                    <li>临时展为主，题材从影像、装置到设计展览不等</li>
+                    <li>部分展览免费，部分需要单独购票</li>
+                </ul>
+
+                <div class="detail-section-title">当前热门展览</div>
+                <ul class="simple-list">
+                    <li><a href="#exhibition-detail-eg3">光与影：20 世纪摄影大师联展</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="detail-section-title">最近动态</div>
+                <ul class="simple-list">
+                    <li><a href="#user-profile-1">木木是只猫</a> · 游记 · <a href="#article-long-psa">在 PSA 的一日观察</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="museum-detail-shanghai-planet">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 上海天文馆
+        </div>
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">上海天文馆</div>
+                <div class="detail-sub">
+                    科技 / 自然 · 浦东新区 临港大道 380 号
+                    <span class="pill">亲子 · 科普</span>
+                </div>
+                <div style="margin-top: 6px; font-size: 13px;">
+                    <span class="rating">综合评分 4.6 / 5</span>
+                    <span class="meta">8,932 人来过 · 6,120 条评分 / 点评</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn">我来过 · 打卡</button>
+                <button class="btn-outline" style="margin-left: 8px;">想去</button>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">游览贴士</div>
+                <ul class="simple-list">
+                    <li>周末和节假日较为拥挤，建议提前预约并尽量选择工作日</li>
+                    <li>有多场球幕影院、宇宙剧场放映，可提前查看场次时间</li>
+                    <li>适合 6 岁以上儿童，可以边玩边学基础天文学知识</li>
+                </ul>
+
+                <div class="detail-section-title">当前热门展览 / 项目</div>
+                <ul class="simple-list">
+                    <li><a href="#exhibition-detail-eg4">星际漫游：人类与宇宙的对话</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="detail-section-title">家长评价</div>
+                <article class="comment-item">
+                    <div class="comment-meta">
+                        <a href="#user-profile-3">带娃暴走团</a> · 评分 4.5 · 2025-03-19
+                    </div>
+                    <div class="comment-text">
+                        小朋友很喜欢互动装置，就是排队时间有点长，建议早点到。
+                    </div>
+                    <div class="comment-actions">有用 30 · 没用 2</div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================== 展览详情页 ================== -->
+
+    <section class="page detail-page" id="exhibition-detail-eg1">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt;
+            <a href="#museum-detail-shanghai-museum">上海博物馆</a> &gt; 青铜之光
+        </div>
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">「青铜之光」——中国古代青铜文明特展</div>
+                <div class="detail-sub">
+                    上海博物馆 · 2025-03-01 ~ 2025-06-30
+                    <span class="pill">考古 · 文物</span>
+                    <span class="pill">适合深度游</span>
+                </div>
+                <div style="margin-top: 6px; font-size: 13px;">
+                    <span class="rating">展览评分 4.8 / 5</span>
+                    <span class="meta">8,120 人看过 · 1,345 条评论 · 23,421 人标记「想看」</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn">我看过 · 打卡</button>
+                <button class="btn-outline" style="margin-left: 8px;">想看</button>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">展览简介</div>
+                <p style="font-size: 13px; line-height: 1.6;">
+                    本次展览汇集国内多家博物馆收藏的珍贵青铜器，以时间为轴线，
+                    系统一览从商周到秦汉的青铜文明发展历程。通过多媒体互动和还原场景，
+                    带领观众走进古人的礼制、战争与日常生活。
+                </p>
+
+                <div class="detail-section-title">看展须知</div>
+                <ul class="simple-list">
+                    <li>建议观展时长：2 - 3 小时</li>
+                    <li>是否需要单独购票：无需单独购票，凭上海博物馆预约码入馆即可</li>
+                    <li>讲解服务：提供人工讲解、语音导览，可现场租借设备</li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="detail-section-title">观众印象标签</div>
+                <div class="tag-row">
+                    <span class="tag">文物量大</span>
+                    <span class="tag">布展清晰</span>
+                    <span class="tag">值得二刷</span>
+                    <span class="tag">适合历史爱好者</span>
+                    <span class="tag">需要一点基础</span>
+                </div>
+
+                <div class="detail-section-title">短评节选</div>
+
+                <article class="comment-item">
+                    <div class="comment-meta">
+                        <a href="#user-profile-7">考古小张</a> · 评分 5.0 · 2025-03-16
+                    </div>
+                    <div class="comment-text">
+                        作为文博专业学生狂喜的一次展览，展品级别很高，而且文字说明难得不啰嗦。
+                    </div>
+                    <div class="comment-actions">
+                        有用 40 · 没用 0
+                    </div>
+                </article>
+
+                <article class="comment-item">
+                    <div class="comment-meta">
+                        <a href="#user-profile-3">带娃暴走团</a> · 评分 4.0 · 2025-03-15
+                    </div>
+                    <div class="comment-text">
+                        内容很好，但对小朋友来说有点难，建议先在家看点相关动画片预热。
+                    </div>
+                    <div class="comment-actions">
+                        有用 15 · 没用 1
+                    </div>
+                </article>
+
+                <div style="margin-top: 8px; font-size: 12px;">
+                    <a href="#exhibition-detail-eg1">写短评 / 游记 &gt;</a> ·
+                    <a href="#exhibition-detail-eg1">查看全部 1,345 条评论 &gt;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="exhibition-detail-eg2">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt;
+            <a href="#museum-detail-shanghai-plan">上海城市规划展示馆</a> &gt; 数字之城
+        </div>
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">数字之城：未来城市交互体验展</div>
+                <div class="detail-sub">
+                    上海城市规划展示馆 · 2025-02-10 ~ 2025-05-10
+                    <span class="pill">互动 · 沉浸式</span>
+                </div>
+                <div style="margin-top: 6px; font-size: 13px;">
+                    <span class="rating">展览评分 4.4 / 5</span>
+                    <span class="meta">3,421 人看过 · 842 条评论</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn">我看过 · 打卡</button>
+                <button class="btn-outline" style="margin-left: 8px;">想看</button>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">展览亮点</div>
+                <ul class="simple-list">
+                    <li>通过交互装置体验「智慧交通 / 智能建筑 / 数字孪生城市」</li>
+                    <li>适合拍照，部分区域有灯光与影像互动</li>
+                </ul>
+            </div>
+            <div>
+                <div class="detail-section-title">适合人群</div>
+                <ul class="simple-list">
+                    <li>对未来城市、科技感兴趣的观众</li>
+                    <li>亲子家庭（建议 8 岁以上）</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="exhibition-detail-eg3">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt;
+            <a href="#museum-detail-shanghai-art">上海当代艺术博物馆</a> &gt; 光与影
+        </div>
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">光与影：20 世纪摄影大师联展</div>
+                <div class="detail-sub">
+                    上海当代艺术博物馆 · 2025-01-20 ~ 2025-04-15
+                    <span class="pill">摄影 · 影像艺术</span>
+                </div>
+                <div style="margin-top: 6px; font-size: 13px;">
+                    <span class="rating">展览评分 4.6 / 5</span>
+                    <span class="meta">5,532 人看过 · 1,233 条评论</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn">我看过 · 打卡</button>
+                <button class="btn-outline" style="margin-left: 8px;">想看</button>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">展览结构</div>
+                <ul class="simple-list">
+                    <li>按时间线梳理 20 世纪摄影技术与风格的演变</li>
+                    <li>按主题分区：战争与和平、城市与日常、身体与自我等</li>
+                </ul>
+            </div>
+            <div>
+                <div class="detail-section-title">相关文章</div>
+                <ul class="simple-list">
+                    <li><a href="#article-long-psa">长评：在光与影之间看见 20 世纪</a> · by 北方来客</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="exhibition-detail-eg4">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt;
+            <a href="#museum-detail-shanghai-planet">上海天文馆</a> &gt; 星际漫游
+        </div>
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">星际漫游：人类与宇宙的对话</div>
+                <div class="detail-sub">
+                    上海天文馆 · 2025-03-15 ~ 2025-08-31
+                    <span class="pill">天文科普</span>
+                    <span class="pill">亲子</span>
+                </div>
+                <div style="margin-top: 6px; font-size: 13px;">
+                    <span class="rating">展览评分 4.7 / 5</span>
+                    <span class="meta">2,153 人看过 · 502 条评论</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn">我看过 · 打卡</button>
+                <button class="btn-outline" style="margin-left: 8px;">想看</button>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">推荐玩法</div>
+                <ul class="simple-list">
+                    <li>先看球幕影院，再进入主展厅体验互动装置</li>
+                    <li>可以让孩子先在家看一些太空题材动画，再来现场「对上号」</li>
+                </ul>
+            </div>
+            <div>
+                <div class="detail-section-title">家长建议</div>
+                <ul class="simple-list">
+                    <li>为避免排队，尽量选择早场或工作日</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="exhibition-detail-permanent">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt;
+            <a href="#museum-detail-shanghai-museum">上海博物馆</a> &gt; 常设展
+        </div>
+        <div class="detail-title">馆藏经典常设展（上海博物馆）</div>
+        <p style="font-size: 13px; line-height: 1.6;">
+            常设展分为多个专题展厅，如中国古代青铜馆、中国古代陶瓷馆、中国历代书法馆等，
+            适合首次来访者按自己兴趣选择 2–3 个重点展厅慢慢看。
+        </p>
+    </section>
+
+    <!-- ================== 用户主页 ================== -->
+
+    <section class="page detail-page" id="user-profile-1">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 用户 · 木木是只猫
+        </div>
+        <div class="detail-header">
+            <div class="profile-header">
+                <div class="avatar" aria-hidden="true"></div>
+                <div>
+                    <div class="profile-name">木木是只猫</div>
+                    <div class="profile-stat">
+                        上海 · 观展 86 次 · 关注 132 人 · 被 420 人关注
+                    </div>
+                    <div style="font-size: 11px; color: #999; margin-top: 4px;">
+                        自我介绍：爱逛博物馆的设计师，主要写当代艺术 / 城市历史相关的观展记录。
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button class="btn-outline">关注</button>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <div>
+                <div class="detail-section-title">观展足迹</div>
+                <ul class="simple-list">
+                    <li>2025 年已打卡：12 馆 · 18 场展览</li>
+                    <li>累计打卡：32 馆 · 64 场展览</li>
+                    <li>去过城市：上海、北京、广州、京都</li>
+                </ul>
+
+                <div class="detail-section-title">徽章 / 成就（示例）</div>
+                <div>
+                    <span class="badge">上海博物馆三刷</span>
+                    <span class="badge">当代艺术 20+ 展</span>
+                    <span class="badge">跨城观展</span>
+                </div>
+            </div>
+
+            <div>
+                <div class="detail-section-title">最近打卡与点评</div>
+
+                <article class="feed-item">
+                    <div class="feed-header">
+                        打卡 · <a href="#museum-detail-shanghai-museum">上海博物馆</a> · 第 2 次
+                    </div>
+                    <div class="feed-content">
+                        「青铜展真的很值得细看，这次专门带外地朋友来，大家都很满意。」
+                    </div>
+                    <div class="feed-meta">
+                        2025-03-21 · 评分 5.0
+                    </div>
+                </article>
+
+                <article class="feed-item">
+                    <div class="feed-header">
+                        短评 · <a href="#exhibition-detail-eg3">光与影：摄影大师联展</a>
+                    </div>
+                    <div class="feed-content">
+                        「布光太美了，展场空间与作品氛围很统一。」
+                    </div>
+                    <div class="feed-meta">
+                        2025-03-12 · 评分 4.5
+                    </div>
+                </article>
+
+                <article class="feed-item">
+                    <div class="feed-header">
+                        游记 · <a href="#museum-detail-shanghai-art">上海当代艺术博物馆</a>
+                    </div>
+                    <div class="feed-content">
+                        「最近的主题展让我重新对当代艺术有点信心了，写了一篇小长文记录一下。」
+                        <a href="#article-long-psa">阅读全文 &gt;</a>
+                    </div>
+                    <div class="feed-meta">
+                        2025-03-01 · 赞 27 · 评论 6
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="user-profile-2">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 用户 · 北方来客
+        </div>
+        <div class="detail-header">
+            <div class="profile-header">
+                <div class="avatar"></div>
+                <div>
+                    <div class="profile-name">北方来客</div>
+                    <div class="profile-stat">北京 / 上海两地往返 · 观展 52 次</div>
+                </div>
+            </div>
+            <div><button class="btn-outline">关注</button></div>
+        </div>
+        <div class="detail-section-title">代表作品</div>
+        <ul class="simple-list">
+            <li>长评 · <a href="#exhibition-detail-eg3">光与影：20 世纪摄影大师联展</a></li>
+            <li>游记 · <a href="#museum-detail-shanghai-museum">再逛上海博物馆：青铜与书画</a></li>
+        </ul>
+    </section>
+
+    <section class="page detail-page" id="user-profile-3">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 用户 · 带娃暴走团
+        </div>
+        <div class="detail-header">
+            <div class="profile-header">
+                <div class="avatar"></div>
+                <div>
+                    <div class="profile-name">带娃暴走团</div>
+                    <div class="profile-stat">亲子向博物馆攻略 · 观展 40 次</div>
+                </div>
+            </div>
+            <div><button class="btn-outline">关注</button></div>
+        </div>
+        <div class="detail-section-title">近期亲子打卡</div>
+        <ul class="simple-list">
+            <li><a href="#museum-detail-shanghai-planet">上海天文馆</a></li>
+            <li><a href="#exhibition-detail-eg1">青铜之光</a>（带 8 岁小朋友）</li>
+        </ul>
+    </section>
+
+    <section class="page detail-page" id="user-profile-4">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 用户 · 静静走路
+        </div>
+        <div class="detail-header">
+            <div class="profile-header">
+                <div class="avatar"></div>
+                <div>
+                    <div class="profile-name">静静走路</div>
+                    <div class="profile-stat">喜欢工作日慢逛博物馆</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="user-profile-5">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 用户 · 岛屿心情
+        </div>
+        <div class="detail-header">
+            <div class="profile-header">
+                <div class="avatar"></div>
+                <div>
+                    <div class="profile-name">岛屿心情</div>
+                    <div class="profile-stat">第一次打卡上海博物馆</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="user-profile-6">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 用户 · 南城读书人
+        </div>
+        <div class="detail-header">
+            <div class="profile-header">
+                <div class="avatar"></div>
+                <div>
+                    <div class="profile-name">南城读书人</div>
+                    <div class="profile-stat">在城市中寻找安静展厅</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="page detail-page" id="user-profile-7">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 用户 · 考古小张
+        </div>
+        <div class="detail-header">
+            <div class="profile-header">
+                <div class="avatar"></div>
+                <div>
+                    <div class="profile-name">考古小张</div>
+                    <div class="profile-stat">文博专业学生 · 爱写展览笔记</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================== 城市页 ================== -->
+
+    <section class="page detail-page" id="city-beijing">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 城市 · 北京
+        </div>
+        <div class="page-title">北京 · 部分博物馆示例</div>
+        <ul class="simple-list">
+            <li>中国国家博物馆</li>
+            <li>故宫博物院</li>
+            <li>首都博物馆</li>
+        </ul>
+    </section>
+
+    <section class="page detail-page" id="city-guangzhou">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 城市 · 广州
+        </div>
+        <div class="page-title">广州 · 部分博物馆示例</div>
+        <ul class="simple-list">
+            <li>广东省博物馆</li>
+            <li>广东美术馆</li>
+        </ul>
+    </section>
+
+    <section class="page detail-page" id="city-chengdu">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 城市 · 成都
+        </div>
+        <div class="page-title">成都 · 部分博物馆示例</div>
+        <ul class="simple-list">
+            <li>成都博物馆</li>
+            <li>金沙遗址博物馆</li>
+        </ul>
+    </section>
+
+    <section class="page detail-page" id="city-more">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt; 更多城市
+        </div>
+        <div class="page-title">更多城市</div>
+        <p style="font-size: 13px;">更多城市与博物馆数据正在丰富中，敬请期待。</p>
+    </section>
+
+    <!-- ================== 长文游记 ================== -->
+
+    <section class="page detail-page" id="article-long-psa">
+        <div class="breadcrumb">
+            <a href="#home">首页</a> &gt;
+            <a href="#exhibition-detail-eg3">光与影：摄影大师联展</a> &gt; 观展记
+        </div>
+        <div class="detail-header">
+            <div>
+                <div class="detail-title">在光与影之间看见 20 世纪 —— 摄影大师联展观展记</div>
+                <div class="detail-sub">
+                    作者：北方来客 · 关联展览：
+                    <a href="#exhibition-detail-eg3">光与影：20 世纪摄影大师联展</a>
+                </div>
+            </div>
+        </div>
+        <p style="font-size: 13px; line-height: 1.8;">
+            这是一篇示例长文内容占位。
+        </p>
+    </section>
+
+</main>
+
+<footer>
+    <p>
+        中国传媒大学 2025 保留一切权力
+    </p>
+    <p><a href="#home">回到首页</a></p>
+</footer>
+
+<script>
+    (function () {
+        var pages = document.querySelectorAll('.page');
+        var navLinks = document.querySelectorAll('.top-nav a');
+
+        function setActiveNav(hash) {
+            var route = (hash || '#home').replace('#', '');
+            navLinks.forEach(function (a) {
+                var nav = a.getAttribute('data-nav');
+                a.classList.remove('active');
+                if (!hash && nav === 'home') {
+                    a.classList.add('active');
+                } else if (route === 'home' && nav === 'home') {
+                    a.classList.add('active');
+                } else if (route.indexOf('exhibition-detail') === 0 && nav === 'exhibition') {
+                    a.classList.add('active');
+                } else if (route.indexOf('city-') === 0 && nav === 'city') {
+                    a.classList.add('active');
+                } else if (route.indexOf('user-profile') === 0 && nav === 'community') {
+                    a.classList.add('active');
+                }
+            });
+        }
+
+        function showPage(hash) {
+            if (!hash || hash === '#') {
+                hash = '#home';
+            }
+            var id = hash.replace('#', '');
+            var found = false;
+
+            pages.forEach(function (p) {
+                if (p.id === id) {
+                    p.classList.add('active');
+                    found = true;
+                } else {
+                    p.classList.remove('active');
+                }
+            });
+
+            if (!found) {
+                // 回退到首页
+                pages.forEach(function (p) {
+                    if (p.id === 'home') {
+                        p.classList.add('active');
+                    }
+                });
+            }
+
+            setActiveNav(hash);
+            window.scrollTo(0, 0);
+        }
+
+        window.addEventListener('hashchange', function () {
+            showPage(location.hash);
+        });
+
+        // 初始加载
+        showPage(location.hash || '#home');
+    })();
+</script>
+
+</body>
+</html>
